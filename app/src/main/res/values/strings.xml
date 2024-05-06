@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Story App</string>
+    <string name="title_welcome_page">welcome to StoryApp!</string>
+    <string name="message_welcome_page">Share your story of learning Android, iOS, Machine Learning, Cloud, Front-End, Back-End, and other IT fields? Just on StoryApp!</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_signup">Sign Up</string>
 </resources>
