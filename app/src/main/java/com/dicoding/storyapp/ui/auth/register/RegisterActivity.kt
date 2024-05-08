@@ -1,8 +1,11 @@
 package com.dicoding.storyapp.ui.auth.register
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.storyapp.databinding.ActivityRegisterBinding
@@ -31,6 +34,7 @@ class RegisterActivity : AppCompatActivity() {
         })
 
         setupAction()
+        playAnimation()
     }
 
     private fun setupAction() {
@@ -46,6 +50,40 @@ class RegisterActivity : AppCompatActivity() {
                 create()
                 show()
             }
+        }
+    }
+
+    private fun playAnimation() {
+        ObjectAnimator.ofFloat(binding.imageView, View.TRANSLATION_X, -30f, 30f).apply {
+            duration = 6000
+            repeatCount = ObjectAnimator.INFINITE
+            repeatMode = ObjectAnimator.REVERSE
+        }.start()
+
+        val register = ObjectAnimator.ofFloat(binding.registerButton, View.ALPHA, 1f).setDuration(500)
+        val title = ObjectAnimator.ofFloat(binding.titleTextView, View.ALPHA, 1f).setDuration(500)
+        val name = ObjectAnimator.ofFloat(binding.nameTextView, View.ALPHA, 1f).setDuration(500)
+        val nameInput = ObjectAnimator.ofFloat(binding.nameEditTextLayout, View.ALPHA, 1f).setDuration(500)
+        val email = ObjectAnimator.ofFloat(binding.emailTextView, View.ALPHA, 1f).setDuration(500)
+        val emailInput = ObjectAnimator.ofFloat(binding.emailEditTextLayout, View.ALPHA, 1f).setDuration(500)
+        val password = ObjectAnimator.ofFloat(binding.passwordTextView, View.ALPHA, 1f).setDuration(500)
+        val passwordInput = ObjectAnimator.ofFloat(binding.passwordEditTextLayout, View.ALPHA, 1f).setDuration(500)
+
+        val togetherName = AnimatorSet().apply {
+            playTogether(name, nameInput)
+        }
+
+        val togetherEmail = AnimatorSet().apply {
+            playTogether(email, emailInput)
+        }
+
+        val togetherPassword = AnimatorSet().apply {
+            playTogether(password, passwordInput)
+        }
+
+        AnimatorSet().apply {
+            playSequentially(title, togetherName, togetherEmail, togetherPassword, register)
+            start()
         }
     }
 }
