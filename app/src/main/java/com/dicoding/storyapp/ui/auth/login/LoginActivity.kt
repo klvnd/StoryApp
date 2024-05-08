@@ -1,4 +1,4 @@
-package com.dicoding.storyapp.view.login
+package com.dicoding.storyapp.ui.auth.login
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

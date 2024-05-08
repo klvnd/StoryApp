@@ -1,10 +1,10 @@
-package com.dicoding.storyapp.view.main
+package com.dicoding.storyapp.ui.main
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.storyapp.databinding.ActivityMainBinding
-import com.dicoding.storyapp.view.login.LoginActivity
+import com.dicoding.storyapp.ui.welcome.WelcomeActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,8 +19,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupAction() {
-        binding.loginButton.setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+        binding.logoutButton.setOnClickListener {
+            startActivity(Intent(this, WelcomeActivity::class.java))
         }
     }
 }
