@@ -18,6 +18,39 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupEmailValidation()
+        setupPasswordValidation()
+        setupAction()
+        playAnimation()
+    }
+
+    private fun validateEmail(email: String): Boolean {
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        return email.matches(emailPattern.toRegex())
+    }
+
+    private fun setupEmailValidation() {
+        binding.emailEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                s?.let {
+                    val isValid = validateEmail(it.toString())
+                    if (!isValid) {
+                        binding.emailEditText.error = "Invalid email format"
+                        binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
+                    } else {
+                        binding.emailEditText.error = null
+                        binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
+                    }
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun setupPasswordValidation() {
         binding.passwordEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -29,16 +62,12 @@ class RegisterActivity : AppCompatActivity() {
                     } else {
                         binding.passwordEditText.error = null
                         binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-
                     }
                 }
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
-
-        setupAction()
-        playAnimation()
     }
 
     private fun setupAction() {

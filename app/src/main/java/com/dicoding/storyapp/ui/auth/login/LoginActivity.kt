@@ -19,6 +19,39 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupEmailValidation()
+        setupPasswordValidation()
+        setupAction()
+        playAnimation()
+    }
+
+    private fun validateEmail(email: String): Boolean {
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        return email.matches(emailPattern.toRegex())
+    }
+
+    private fun setupEmailValidation() {
+        binding.emailEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                s?.let {
+                    val isValid = validateEmail(it.toString())
+                    if (!isValid) {
+                        binding.emailEditText.error = "Invalid email format"
+                        binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
+                    } else {
+                        binding.emailEditText.error = null
+                        binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
+                    }
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun setupPasswordValidation() {
         binding.passwordEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -36,12 +69,9 @@ class LoginActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
-
-        login()
-        playAnimation()
     }
 
-    private fun login() {
+    private fun setupAction() {
         binding.loginButton.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
         }
