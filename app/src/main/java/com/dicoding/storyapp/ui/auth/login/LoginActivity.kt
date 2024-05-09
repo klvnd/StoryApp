@@ -10,6 +10,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
 import com.dicoding.storyapp.ui.main.MainActivity
+import com.google.android.material.textfield.TextInputLayout
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -24,9 +25,11 @@ class LoginActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 s?.let {
                     if (it.length < 8) {
-                        binding.passwordEditText.error = "Password tidak boleh kurang dari 8 karakter";null
+                        binding.passwordEditText.error = "Password must not be less than 8 characters"
+                        binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
                     } else {
                         binding.passwordEditText.error = null
+                        binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
                     }
                 }
             }
