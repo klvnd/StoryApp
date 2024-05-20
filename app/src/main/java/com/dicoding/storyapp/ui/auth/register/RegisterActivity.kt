@@ -8,11 +8,19 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.storyapp.data.api.ApiConfig
+import com.dicoding.storyapp.data.Repository
 import com.dicoding.storyapp.databinding.ActivityRegisterBinding
+import com.dicoding.storyapp.ui.viewmodel.UserViewModel
+import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.google.android.material.textfield.TextInputLayout
 
 class RegisterActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityRegisterBinding
+    private lateinit var viewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
@@ -20,8 +28,59 @@ class RegisterActivity : AppCompatActivity() {
 
         setupEmailValidation()
         setupPasswordValidation()
-        setupAction()
         playAnimation()
+
+        val apiService = ApiConfig.getApiService()
+        val repository = Repository(apiService)
+        val factory = ViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[UserViewModel::class.java]
+
+        binding.registerButton.setOnClickListener {
+            val name = binding.nameEditText.text.toString()
+            val email = binding.emailEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                AlertDialog.Builder(this).apply {
+                    setTitle("Registration Failed")
+                    setMessage("Please fill in all fields")
+                    setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    create()
+                    show()
+                }
+            } else {
+                binding.progressBar.visibility = View.VISIBLE
+                viewModel.register(name, email, password)
+            }
+        }
+
+        viewModel.registerResponse.observe(this) { response ->
+            binding.progressBar.visibility = View.GONE
+            if (response.error == false) {
+                val email = binding.emailEditText.text.toString()
+                AlertDialog.Builder(this).apply {
+                    setTitle("Yeah!")
+                    setMessage("The account with $email is ready. Come on, log in and share your story")
+                    setPositiveButton("Log In") { _, _ ->
+                        finish()
+                    }
+                    create()
+                    show()
+                }
+            } else {
+                AlertDialog.Builder(this).apply {
+                    setTitle("Registration Failed")
+                    setMessage(response.message ?: "Unknown error occurred")
+                    setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    create()
+                    show()
+                }
+            }
+        }
     }
 
     private fun validateEmail(email: String): Boolean {
@@ -70,21 +129,6 @@ class RegisterActivity : AppCompatActivity() {
         })
     }
 
-    private fun setupAction() {
-        binding.registerButton.setOnClickListener {
-            val email = binding.emailEditText.text.toString()
-
-            AlertDialog.Builder(this).apply {
-                setTitle("Yeah!")
-                setMessage("Akun dengan $email sudah jadi nih. Yuk, login dan belajar coding.")
-                setPositiveButton("Lanjut") { _, _ ->
-                    finish()
-                }
-                create()
-                show()
-            }
-        }
-    }
 
     private fun playAnimation() {
         ObjectAnimator.ofFloat(binding.imageView, View.TRANSLATION_X, -30f, 30f).apply {

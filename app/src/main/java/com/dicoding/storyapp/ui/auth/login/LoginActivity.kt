@@ -2,14 +2,13 @@ package com.dicoding.storyapp.ui.auth.login
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
-import com.dicoding.storyapp.ui.main.MainActivity
 import com.google.android.material.textfield.TextInputLayout
 
 class LoginActivity : AppCompatActivity() {
@@ -21,8 +20,8 @@ class LoginActivity : AppCompatActivity() {
 
         setupEmailValidation()
         setupPasswordValidation()
-        setupAction()
         playAnimation()
+        setupAction()
     }
 
     private fun validateEmail(email: String): Boolean {
@@ -71,12 +70,6 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private fun setupAction() {
-        binding.loginButton.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-        }
-    }
-
     private fun playAnimation() {
         ObjectAnimator.ofFloat(binding.imageView, View.TRANSLATION_X, -30f, 30f).apply {
             duration = 6000
@@ -102,6 +95,13 @@ class LoginActivity : AppCompatActivity() {
         AnimatorSet().apply {
             playSequentially(title, togetherEmail, togetherPassword, login)
             start()
+        }
+    }
+
+    private fun setupAction() {
+        binding.loginButton.setOnClickListener {
+//            startActivity(Intent(this, MainActivity::class.java))
+            Toast.makeText(this, "Fungsi Login belum dibuat", Toast.LENGTH_SHORT).show()
         }
     }
 }
