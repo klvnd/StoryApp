@@ -2,6 +2,7 @@ package com.dicoding.storyapp.data
 
 import com.dicoding.storyapp.data.api.ApiService
 import com.dicoding.storyapp.data.response.ErrorResponse
+import com.dicoding.storyapp.data.response.LoginResponse
 import com.dicoding.storyapp.data.response.RegisterResponse
 import com.google.gson.Gson
 import retrofit2.HttpException
@@ -33,7 +34,11 @@ class Repository(private val apiService: ApiService) {
     }
 
     // Add the login method if necessary
-    suspend fun login(email: String, password: String) {
-        // Handle login logic
+    suspend fun login(email: String, password: String): LoginResponse {
+        return try {
+            apiService.login(email, password)
+        } catch (e: Exception) {
+            LoginResponse(error = true, message = e.message)
+        }
     }
 }

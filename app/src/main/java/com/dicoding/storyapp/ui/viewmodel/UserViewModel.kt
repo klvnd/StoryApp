@@ -5,13 +5,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dicoding.storyapp.data.Repository
+import com.dicoding.storyapp.data.response.LoginResponse
 import com.dicoding.storyapp.data.response.RegisterResponse
 import kotlinx.coroutines.launch
 
 class UserViewModel (private val repository: Repository) : ViewModel(){
 
     private val _registerResponse = MutableLiveData<RegisterResponse>()
+    private val _loginResponse = MutableLiveData<LoginResponse>()
     val registerResponse: LiveData<RegisterResponse> = _registerResponse
+    val loginResponse: LiveData<LoginResponse> = _loginResponse
 
     fun register(name: String, email: String, password: String) {
         viewModelScope.launch {
@@ -23,7 +26,7 @@ class UserViewModel (private val repository: Repository) : ViewModel(){
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val response = repository.login(email, password)
-            // Handle response
+            _loginResponse.postValue(response)
         }
     }
 

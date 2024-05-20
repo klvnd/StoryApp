@@ -2,17 +2,26 @@ package com.dicoding.storyapp.ui.auth.login
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import com.dicoding.storyapp.data.Repository
+import com.dicoding.storyapp.data.api.ApiConfig
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
+import com.dicoding.storyapp.ui.main.MainActivity
+import com.dicoding.storyapp.ui.viewmodel.UserViewModel
+import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.google.android.material.textfield.TextInputLayout
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+    private lateinit var viewModel: UserViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
@@ -21,7 +30,51 @@ class LoginActivity : AppCompatActivity() {
         setupEmailValidation()
         setupPasswordValidation()
         playAnimation()
-        setupAction()
+//        setupAction()
+
+        val apiService = ApiConfig.getApiService()
+        val repository = Repository(apiService)
+        val factory = ViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[UserViewModel::class.java]
+
+        binding.loginButton.setOnClickListener{
+            val email = binding.emailEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                AlertDialog.Builder(this).apply {
+                    setTitle("Login Failed")
+                    setMessage("Please fill in all fields")
+                    setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    create()
+                    show()
+                }
+            } else {
+                binding.progressBar.visibility = View.VISIBLE
+                viewModel.login(email, password)
+            }
+        }
+
+        viewModel.loginResponse.observe(this) { response ->
+            binding.progressBar.visibility = View.GONE
+            if (response.error == false) {
+                Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            } else {
+                AlertDialog.Builder(this).apply {
+                    setTitle("Login Failed")
+                    setMessage(response.message)
+                    setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    create()
+                    show()
+                }
+            }
+        }
     }
 
     private fun validateEmail(email: String): Boolean {
@@ -98,10 +151,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupAction() {
-        binding.loginButton.setOnClickListener {
+//    private fun setupAction() {
+//        binding.loginButton.setOnClickListener {
 //            startActivity(Intent(this, MainActivity::class.java))
-            Toast.makeText(this, "Fungsi Login belum dibuat", Toast.LENGTH_SHORT).show()
-        }
-    }
+//            Toast.makeText(this, "Fungsi Login belum dibuat", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 }
