@@ -79,6 +79,7 @@ class RegisterActivity : AppCompatActivity() {
                     create()
                     show()
                 }
+                clearInputFields()
             }
         }
     }
@@ -127,6 +128,12 @@ class RegisterActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun clearInputFields() {
+        binding.nameEditText.text?.clear()
+        binding.emailEditText.text?.clear()
+        binding.passwordEditText.text?.clear()
     }
 
 
