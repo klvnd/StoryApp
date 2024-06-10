@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.data.Repository
 import com.dicoding.storyapp.data.api.ApiConfig
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
@@ -18,26 +20,30 @@ import com.dicoding.storyapp.ui.main.MainActivity
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
 import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var viewModel: UserViewModel
+    private lateinit var dataStoreManager: DataStoreManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        dataStoreManager = DataStoreManager(this)
+
         setupEmailValidation()
         setupPasswordValidation()
         playAnimation()
-//        setupAction()
 
         val apiService = ApiConfig.getApiService()
         val repository = Repository(apiService)
         val factory = ViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[UserViewModel::class.java]
 
-        binding.loginButton.setOnClickListener{
+        binding.loginButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
 
@@ -45,9 +51,7 @@ class LoginActivity : AppCompatActivity() {
                 AlertDialog.Builder(this).apply {
                     setTitle("Login Failed")
                     setMessage("Please fill in all fields")
-                    setPositiveButton("OK") { dialog, _ ->
-                        dialog.dismiss()
-                    }
+                    setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     create()
                     show()
                 }
@@ -60,6 +64,9 @@ class LoginActivity : AppCompatActivity() {
         viewModel.loginResponse.observe(this) { response ->
             binding.progressBar.visibility = View.GONE
             if (response.error == false) {
+                lifecycleScope.launch {
+                    response.loginResult?.token?.let { dataStoreManager.saveToken(it) }
+                }
                 Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
@@ -67,9 +74,7 @@ class LoginActivity : AppCompatActivity() {
                 AlertDialog.Builder(this).apply {
                     setTitle("Login Failed")
                     setMessage(response.message)
-                    setPositiveButton("OK") { dialog, _ ->
-                        dialog.dismiss()
-                    }
+                    setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     create()
                     show()
                 }
@@ -150,11 +155,4 @@ class LoginActivity : AppCompatActivity() {
             start()
         }
     }
-
-//    private fun setupAction() {
-//        binding.loginButton.setOnClickListener {
-//            startActivity(Intent(this, MainActivity::class.java))
-//            Toast.makeText(this, "Fungsi Login belum dibuat", Toast.LENGTH_SHORT).show()
-//        }
-//    }
 }
