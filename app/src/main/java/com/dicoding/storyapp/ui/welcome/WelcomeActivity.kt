@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.databinding.ActivityWelcomeBinding
 import com.dicoding.storyapp.ui.auth.login.LoginActivity
+import com.dicoding.storyapp.ui.auth.register.RegisterActivity
 import com.dicoding.storyapp.ui.main.MainActivity
 import kotlinx.coroutines.launch
 
@@ -26,17 +27,25 @@ class WelcomeActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             dataStoreManager.tokenFlow.collect { token ->
-                if (token.isNullOrEmpty()) {
-                    // No token, navigate to LoginActivity
-                    startActivity(Intent(this@WelcomeActivity, LoginActivity::class.java))
-                } else {
+                if (!token.isNullOrEmpty()) {
                     // Token exists, navigate to MainActivity
                     startActivity(Intent(this@WelcomeActivity, MainActivity::class.java))
+                    finish()
                 }
-                finish()
             }
         }
+        setupAction()
         playAnimation()
+    }
+
+    private fun setupAction() {
+        binding.loginButton.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
+
+        binding.registerButton.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
+        }
     }
 
     private fun playAnimation() {

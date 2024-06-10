@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         dataStoreManager = DataStoreManager(this)
 
         setupAction()
+//        observeToken()
     }
 
     private fun setupAction() {
@@ -33,4 +34,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+//    private fun observeToken() {
+//        lifecycleScope.launch {
+//            dataStoreManager.tokenFlow.collect { token ->
+//                token?.let {
+//                    binding.messageTextView.text = "Token: $token"
+//                } ?: run {
+//                    binding.messageTextView.text = "Token not available"
+//                }
+//            }
+//        }
+//    }
 }
