@@ -2,8 +2,11 @@ package com.dicoding.storyapp.ui.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.databinding.ActivityMainBinding
 import com.dicoding.storyapp.ui.welcome.WelcomeActivity
@@ -21,29 +24,24 @@ class MainActivity : AppCompatActivity() {
 
         dataStoreManager = DataStoreManager(this)
 
-        setupAction()
-//        observeToken()
     }
 
-    private fun setupAction() {
-        binding.logoutButton.setOnClickListener {
-            lifecycleScope.launch {
-                dataStoreManager.clearToken()
-                startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
-                finish()
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                lifecycleScope.launch {
+                    dataStoreManager.clearToken()
+                    startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
+                    finish()
+                }
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
     }
-
-//    private fun observeToken() {
-//        lifecycleScope.launch {
-//            dataStoreManager.tokenFlow.collect { token ->
-//                token?.let {
-//                    binding.messageTextView.text = "Token: $token"
-//                } ?: run {
-//                    binding.messageTextView.text = "Token not available"
-//                }
-//            }
-//        }
-//    }
 }
