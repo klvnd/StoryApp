@@ -11,4 +11,6 @@
     <string name="name">Name</string>
     <string name="message_main_page">message Main Activity</string>
     <string name="logout">Logout</string>
+    <string name="content">Content</string>
+    <string name="title">Title</string>
 </resources>
