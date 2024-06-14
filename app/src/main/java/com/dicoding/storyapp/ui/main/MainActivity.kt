@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.databinding.ActivityMainBinding
-import com.dicoding.storyapp.ui.addstory.AddStoryActivity
+import com.dicoding.storyapp.ui.story.AddStoryActivity
+import com.dicoding.storyapp.ui.story.Injection
+import com.dicoding.storyapp.ui.story.StoryAdapter
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
 import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.dicoding.storyapp.ui.welcome.WelcomeActivity

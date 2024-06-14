@@ -1,30 +1,21 @@
 package com.dicoding.storyapp.ui.story
 
 import android.os.Bundle
-import androidx.activity.viewModels
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.dicoding.storyapp.databinding.ActivityDetailStoryBinding
-import com.dicoding.storyapp.ui.viewmodel.UserViewModel
-import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
-import kotlinx.coroutines.runBlocking
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.dicoding.storyapp.R
 
 class DetailStoryActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityDetailStoryBinding
-    private val viewModel: UserViewModel by viewModels {
-        ViewModelFactory(runBlocking { Injection.provideRepository(this@DetailStoryActivity) })
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityDetailStoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val storyId = intent.getStringExtra("STORY_ID")
-
-        viewModel.getStoryDetail(storyId.toString()).observe(this) { storyDetail ->
-            binding.title.text = storyDetail.name
-            binding.description.text = storyDetail.description
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_detail_story)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
         }
     }
 }
