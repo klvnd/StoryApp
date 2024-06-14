@@ -1,19 +1,26 @@
 package com.dicoding.storyapp.ui.main
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.databinding.ActivityMainBinding
+import com.dicoding.storyapp.ui.addstory.AddStoryActivity
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
 import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.dicoding.storyapp.ui.welcome.WelcomeActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -23,10 +30,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dataStoreManager: DataStoreManager
     private lateinit var storyAdapter: StoryAdapter
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
+        supportActionBar?.setCustomView(R.layout.custom_action_bar)
+
+        val titleTextView = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
+        titleTextView?.text = "Story App"
 
         dataStoreManager = DataStoreManager(this)
 
@@ -46,6 +60,11 @@ class MainActivity : AppCompatActivity() {
                 binding.rvStory.adapter = storyAdapter
             }
         }
+
+        val fab: FloatingActionButton = findViewById(R.id.fab)
+        fab.setOnClickListener {
+            startActivity(Intent(this, AddStoryActivity::class.java))
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -56,11 +75,22 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_settings -> {
-                lifecycleScope.launch {
-                    dataStoreManager.clearToken()
-                    startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
-                    finish()
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Logout")
+                builder.setMessage("Are you sure you want to logout?")
+                builder.setPositiveButton("Yes") { dialog, _ ->
+                    lifecycleScope.launch {
+                        dataStoreManager.clearToken()
+                        startActivity(Intent(this@MainActivity, WelcomeActivity::class.java))
+                        Toast.makeText(this@MainActivity, "You have logged out", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    dialog.dismiss()
                 }
+                builder.setNegativeButton("No") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                builder.create().show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
