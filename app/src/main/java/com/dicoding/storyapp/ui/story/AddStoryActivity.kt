@@ -1,8 +1,7 @@
-package com.dicoding.storyapp.ui.addstory
+package com.dicoding.storyapp.ui.story
 
 import android.os.Bundle
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
