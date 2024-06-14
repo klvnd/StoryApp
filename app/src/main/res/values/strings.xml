@@ -13,4 +13,10 @@
     <string name="logout">Logout</string>
     <string name="content">Content</string>
     <string name="title">Title</string>
+    <string name="action_bar_title">Action Bar Title</string>
+    <string name="add_story">Add Story</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="description">Description</string>
+    <string name="upload">Upload</string>
 </resources>
