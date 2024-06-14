@@ -3,10 +3,12 @@ package com.dicoding.storyapp.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.dicoding.storyapp.data.Repository
 import com.dicoding.storyapp.data.response.LoginResponse
 import com.dicoding.storyapp.data.response.RegisterResponse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class UserViewModel (private val repository: Repository) : ViewModel(){
@@ -30,4 +32,7 @@ class UserViewModel (private val repository: Repository) : ViewModel(){
         }
     }
 
+    fun getStories() = liveData(Dispatchers.IO) {
+        emit(repository.getStories())
+    }
 }

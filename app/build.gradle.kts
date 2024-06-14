@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.okhttp3.logging.interceptor)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.glide)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
