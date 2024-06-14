@@ -1,4 +1,4 @@
-package com.dicoding.storyapp.ui.main
+package com.dicoding.storyapp.ui.story
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
