@@ -31,7 +31,8 @@ class RegisterActivity : AppCompatActivity() {
         setupPasswordValidation()
         playAnimation()
 
-        val apiService = ApiConfig.getApiService()
+        val token = ""
+        val apiService = ApiConfig.getApiService(token)
         val repository = Repository(apiService)
         val factory = ViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[UserViewModel::class.java]
