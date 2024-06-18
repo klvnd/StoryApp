@@ -15,8 +15,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.DataStoreManager
+import com.dicoding.storyapp.data.response.ListStoryItem
 import com.dicoding.storyapp.databinding.ActivityMainBinding
 import com.dicoding.storyapp.ui.story.AddStoryActivity
+import com.dicoding.storyapp.ui.story.DetailStoryActivity
 import com.dicoding.storyapp.ui.story.Injection
 import com.dicoding.storyapp.ui.story.StoryAdapter
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
@@ -46,7 +48,11 @@ class MainActivity : AppCompatActivity() {
 
         dataStoreManager = DataStoreManager(this)
 
-        storyAdapter = StoryAdapter(emptyList())
+        storyAdapter = StoryAdapter(emptyList(), object : StoryAdapter.OnItemClickListener {
+            override fun onItemClick(story: ListStoryItem) {
+                showDetailActivity(story)
+            }
+        })
         binding.rvStory.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = storyAdapter
@@ -58,7 +64,11 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.getStories().observe(this) { storyResponse ->
             storyResponse?.listStory?.let { stories ->
-                storyAdapter = StoryAdapter(stories)
+                storyAdapter = StoryAdapter(stories, object : StoryAdapter.OnItemClickListener {
+                    override fun onItemClick(story: ListStoryItem) {
+                        showDetailActivity(story)
+                    }
+                })
                 binding.rvStory.adapter = storyAdapter
             }
         }
@@ -67,6 +77,12 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             startActivity(Intent(this, AddStoryActivity::class.java))
         }
+    }
+
+    private fun showDetailActivity(story: ListStoryItem) {
+        val intent = Intent(this, DetailStoryActivity::class.java)
+//        intent.putExtra(DetailStoryActivity.EXTRA_STORY, story)
+        startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
