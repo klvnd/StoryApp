@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showDetailActivity(story: ListStoryItem) {
         val intent = Intent(this, DetailStoryActivity::class.java)
-//        intent.putExtra(DetailStoryActivity.EXTRA_STORY, story)
+        intent.putExtra(DetailStoryActivity.STORY_ID, story.id)
         startActivity(intent)
     }
 

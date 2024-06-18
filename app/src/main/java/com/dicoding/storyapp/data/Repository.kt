@@ -2,6 +2,7 @@ package com.dicoding.storyapp.data
 
 import com.dicoding.storyapp.data.api.ApiService
 import com.dicoding.storyapp.data.response.ErrorResponse
+import com.dicoding.storyapp.data.response.ListStoryItem
 import com.dicoding.storyapp.data.response.LoginResponse
 import com.dicoding.storyapp.data.response.RegisterResponse
 import com.dicoding.storyapp.data.response.StoryResponse
@@ -37,8 +38,8 @@ class Repository(private val apiService: ApiService) {
         return apiService.getStories()
     }
 
-    suspend fun getStoryDetail(id: String): StoryResponse {
-        return apiService.getStoryDetail(id)
+    suspend fun getStoryDetail(storyId: String): ListStoryItem {
+        return apiService.getStoryDetail(storyId)
     }
 
     private fun parseErrorResponse(exception: HttpException): ErrorResponse {

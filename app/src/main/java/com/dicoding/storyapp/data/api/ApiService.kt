@@ -1,5 +1,6 @@
 package com.dicoding.storyapp.data.api
 
+import com.dicoding.storyapp.data.response.ListStoryItem
 import com.dicoding.storyapp.data.response.LoginResponse
 import com.dicoding.storyapp.data.response.RegisterResponse
 import com.dicoding.storyapp.data.response.StoryResponse
@@ -29,5 +30,5 @@ interface ApiService {
     suspend fun getStories(): StoryResponse
 
     @GET("stories/{id}")
-    suspend fun getStoryDetail(@Path("id") id: String): StoryResponse
+    suspend fun getStoryDetail(@Path("id") storyId: String): ListStoryItem
 }
