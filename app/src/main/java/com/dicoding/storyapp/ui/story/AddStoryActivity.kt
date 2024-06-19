@@ -8,8 +8,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.dicoding.storyapp.R
 import com.dicoding.storyapp.databinding.ActivityAddStoryBinding
 
@@ -37,16 +35,24 @@ class AddStoryActivity : AppCompatActivity() {
         binding.btnCamera.setOnClickListener {
             startCamera()
         }
+
+        binding.btnUpload.setOnClickListener {
+            uploadStory()
+        }
+    }
+
+    private fun uploadStory() {
+        showToast("Upload clicked")
     }
 
     private fun startCamera() {
-        Toast.makeText(this, "Camera clicked", Toast.LENGTH_SHORT).show()
+        showToast("Camera clicked")
     }
 
     private fun startGallery() {
-        launcherGallery.launch(
-            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-        )
+        showToast("Gallery clicked")
+        launcherGallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+
     }
 
     private val launcherGallery = registerForActivityResult(
@@ -54,11 +60,14 @@ class AddStoryActivity : AppCompatActivity() {
     ) { uri: Uri? ->
         if (uri != null) {
             currentImageUri = uri
-            binding.ivAddStoryImage.setImageURI(uri)
-            showToast("Image selected: $uri")
+            showImage()
         } else {
-            showToast("No image selected")
+            showToast("No media selected")
         }
+    }
+
+    private fun showImage() {
+        binding.ivAddStoryImage.setImageURI(currentImageUri)
     }
 
     private fun showToast(message: String) {
