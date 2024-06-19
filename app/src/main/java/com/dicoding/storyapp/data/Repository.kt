@@ -38,10 +38,6 @@ class Repository(private val apiService: ApiService) {
         return apiService.getStories()
     }
 
-    suspend fun getStoryDetail(storyId: String): ListStoryItem {
-        return apiService.getStoryDetail(storyId)
-    }
-
     private fun parseErrorResponse(exception: HttpException): ErrorResponse {
         return try {
             val errorBody = exception.response()?.errorBody()?.string()

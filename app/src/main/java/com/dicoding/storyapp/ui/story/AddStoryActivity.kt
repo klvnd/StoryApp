@@ -33,6 +33,14 @@ class AddStoryActivity : AppCompatActivity() {
         binding.btnGallery.setOnClickListener {
             startGallery()
         }
+
+        binding.btnCamera.setOnClickListener {
+            startCamera()
+        }
+    }
+
+    private fun startCamera() {
+        Toast.makeText(this, "Camera clicked", Toast.LENGTH_SHORT).show()
     }
 
     private fun startGallery() {

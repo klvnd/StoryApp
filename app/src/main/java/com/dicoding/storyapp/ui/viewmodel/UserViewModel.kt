@@ -36,7 +36,4 @@ class UserViewModel (private val repository: Repository) : ViewModel(){
         emit(repository.getStories())
     }
 
-    fun getStoryDetail(storyId: String) = liveData(Dispatchers.IO) {
-        emit(repository.getStoryDetail(storyId))
-    }
 }

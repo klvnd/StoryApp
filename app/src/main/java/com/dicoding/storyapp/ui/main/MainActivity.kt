@@ -79,11 +79,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     private fun showDetailActivity(story: ListStoryItem) {
         val intent = Intent(this, DetailStoryActivity::class.java)
-        intent.putExtra(DetailStoryActivity.STORY_ID, story.id)
+        intent.putExtra(DetailStoryActivity.STORY_ITEM, story)
         startActivity(intent)
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
