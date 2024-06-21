@@ -2,6 +2,7 @@ package com.dicoding.storyapp.ui.story
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,7 @@ class DetailStoryActivity : AppCompatActivity() {
 
         supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
         supportActionBar?.setCustomView(R.layout.custom_action_bar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val titleTextView = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
         titleTextView?.text = "Detail Story"
@@ -36,6 +38,16 @@ class DetailStoryActivity : AppCompatActivity() {
             Glide.with(this@DetailStoryActivity)
                 .load(story.photoUrl)
                 .into(ivDetailStoryImage)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
