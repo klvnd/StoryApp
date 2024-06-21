@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -15,9 +16,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.dicoding.storyapp.R
+import com.dicoding.storyapp.data.DataStoreManager
+import com.dicoding.storyapp.data.api.ApiConfig
+import com.dicoding.storyapp.data.response.ErrorResponse
 import com.dicoding.storyapp.databinding.ActivityAddStoryBinding
+import com.dicoding.storyapp.ui.main.MainActivity
+import com.google.gson.Gson
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.HttpException
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 class AddStoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddStoryBinding
@@ -51,7 +66,51 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
     private fun uploadStory() {
-        showToast("Upload clicked")
+        currentImageUri?.let { uri ->
+            val imageFile = uriToFile(uri)
+
+            val description = binding.etDescription.text.toString()
+
+            showLoading(true)
+
+            val requestBody = description.toRequestBody("text/plain".toMediaType())
+            val requestImageFile = imageFile.asRequestBody("image/jpeg".toMediaType())
+            val multipartBody = MultipartBody.Part.createFormData(
+                "photo",
+                imageFile.name,
+                requestImageFile
+            )
+
+            val dataStoreManager = DataStoreManager(this)
+            lifecycleScope.launch {
+                try {
+                    val token = dataStoreManager.tokenFlow.first() ?: ""
+                    val apiService = ApiConfig.getApiService(token = token)
+                    val errorResponse = apiService.addStories(requestBody, multipartBody)
+                    errorResponse.message?.let { showToast(it) }
+                    showLoading(false)
+                    val intent = Intent(this@AddStoryActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                } catch (e: HttpException) {
+                    val errorBody = e.response()?.errorBody()?.string()
+                    val errorResponse = Gson().fromJson(errorBody, ErrorResponse::class.java)
+                    errorResponse.message?.let { showToast(it) }
+                    showLoading(false)
+                }
+            }
+        } ?: showToast("Please select an image")
+    }
+
+
+    private fun uriToFile(uri: Uri): File {
+        val file = File(cacheDir, "temp_image.jpg")
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            file.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        return file
     }
 
     private fun checkCameraPermission() {
@@ -136,5 +195,9 @@ class AddStoryActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 }
