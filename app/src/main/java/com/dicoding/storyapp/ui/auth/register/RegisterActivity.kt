@@ -2,6 +2,7 @@ package com.dicoding.storyapp.ui.auth.register
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.dicoding.storyapp.data.api.ApiConfig
 import com.dicoding.storyapp.data.Repository
 import com.dicoding.storyapp.databinding.ActivityRegisterBinding
+import com.dicoding.storyapp.ui.auth.login.LoginActivity
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
 import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.google.android.material.textfield.TextInputLayout
@@ -36,6 +38,10 @@ class RegisterActivity : AppCompatActivity() {
         val repository = Repository(apiService)
         val factory = ViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[UserViewModel::class.java]
+
+        binding.loginTextView.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
 
         binding.registerButton.setOnClickListener {
             val name = binding.nameEditText.text.toString()
@@ -154,6 +160,7 @@ class RegisterActivity : AppCompatActivity() {
         val emailInput = ObjectAnimator.ofFloat(binding.emailEditTextLayout, View.ALPHA, 1f).setDuration(500)
         val password = ObjectAnimator.ofFloat(binding.passwordTextView, View.ALPHA, 1f).setDuration(500)
         val passwordInput = ObjectAnimator.ofFloat(binding.passwordEditTextLayout, View.ALPHA, 1f).setDuration(500)
+        val login = ObjectAnimator.ofFloat(binding.loginTextView, View.ALPHA, 1f).setDuration(500)
 
         val togetherName = AnimatorSet().apply {
             playTogether(name, nameInput)
@@ -168,7 +175,7 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         AnimatorSet().apply {
-            playSequentially(title, togetherName, togetherEmail, togetherPassword, register)
+            playSequentially(title, togetherName, togetherEmail, togetherPassword, login, register)
             start()
         }
     }

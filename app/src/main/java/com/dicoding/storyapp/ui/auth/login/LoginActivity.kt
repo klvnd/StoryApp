@@ -16,6 +16,7 @@ import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.data.Repository
 import com.dicoding.storyapp.data.api.ApiConfig
 import com.dicoding.storyapp.databinding.ActivityLoginBinding
+import com.dicoding.storyapp.ui.auth.register.RegisterActivity
 import com.dicoding.storyapp.ui.main.MainActivity
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
 import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
@@ -44,6 +45,10 @@ class LoginActivity : AppCompatActivity() {
         val repository = Repository(apiService)
         val factory = ViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[UserViewModel::class.java]
+
+        binding.registerTextView.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
+        }
 
         binding.loginButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()
@@ -143,6 +148,7 @@ class LoginActivity : AppCompatActivity() {
         val emailInput = ObjectAnimator.ofFloat(binding.emailEditTextLayout, View.ALPHA, 1f).setDuration(500)
         val password = ObjectAnimator.ofFloat(binding.passwordTextView, View.ALPHA, 1f).setDuration(500)
         val passwordInput = ObjectAnimator.ofFloat(binding.passwordEditTextLayout, View.ALPHA, 1f).setDuration(500)
+        val register = ObjectAnimator.ofFloat(binding.registerTextView, View.ALPHA, 1f).setDuration(500)
 
         val togetherEmail = AnimatorSet().apply {
             playTogether(email, emailInput)
@@ -153,7 +159,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         AnimatorSet().apply {
-            playSequentially(title, togetherEmail, togetherPassword, login)
+            playSequentially(title, togetherEmail, togetherPassword, register, login)
             start()
         }
     }
