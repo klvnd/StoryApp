@@ -161,21 +161,6 @@
             app:layout_constraintTop_toBottomOf="@id/passwordEditTextLayout"
             tools:alpha="100" />
 
-<!--        <Button-->
-<!--            android:id="@+id/registerButton"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="64dp"-->
-<!--            android:layout_marginStart="32dp"-->
-<!--            android:layout_marginTop="32dp"-->
-<!--            android:layout_marginEnd="32dp"-->
-<!--            android:backgroundTint="@color/charcoal"-->
-<!--            android:text="@string/btn_register"-->
-<!--            android:alpha="0"-->
-<!--            tools:alpha="100"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/loginTextView" />-->
-
         <com.dicoding.storyapp.button.MyButton
             android:id="@+id/registerButton"
             android:layout_width="300dp"
