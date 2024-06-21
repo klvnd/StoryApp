@@ -54,18 +54,8 @@ class LoginActivity : AppCompatActivity() {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
 
-            if (email.isEmpty() || password.isEmpty()) {
-                AlertDialog.Builder(this).apply {
-                    setTitle("Login Failed")
-                    setMessage("Please fill in all fields")
-                    setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                    create()
-                    show()
-                }
-            } else {
-                binding.progressBar.visibility = View.VISIBLE
-                viewModel.login(email, password)
-            }
+            binding.progressBar.visibility = View.VISIBLE
+            viewModel.login(email, password)
         }
 
         viewModel.loginResponse.observe(this) { response ->
@@ -109,10 +99,17 @@ class LoginActivity : AppCompatActivity() {
                         binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
                     }
                 }
+                checkFieldsForEmptyValues()
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun checkFieldsForEmptyValues() {
+        val email = binding.emailEditText.text.toString()
+        val password = binding.passwordEditText.text.toString()
+
+        binding.loginButton.isEnabled = email.isNotEmpty() && password.isNotEmpty()
     }
 
     private fun setupPasswordValidation() {
@@ -129,8 +126,8 @@ class LoginActivity : AppCompatActivity() {
                         binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
                     }
                 }
+                checkFieldsForEmptyValues()
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }

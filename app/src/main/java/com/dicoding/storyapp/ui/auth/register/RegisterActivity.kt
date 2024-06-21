@@ -29,6 +29,7 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        setupNameValidation()
         setupEmailValidation()
         setupPasswordValidation()
         playAnimation()
@@ -48,20 +49,8 @@ class RegisterActivity : AppCompatActivity() {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
 
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                AlertDialog.Builder(this).apply {
-                    setTitle("Registration Failed")
-                    setMessage("Please fill in all fields")
-                    setPositiveButton("OK") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    create()
-                    show()
-                }
-            } else {
-                binding.progressBar.visibility = View.VISIBLE
-                viewModel.register(name, email, password)
-            }
+            binding.progressBar.visibility = View.VISIBLE
+            viewModel.register(name, email, password)
         }
 
         viewModel.registerResponse.observe(this) { response ->
@@ -97,6 +86,18 @@ class RegisterActivity : AppCompatActivity() {
         return email.matches(emailPattern.toRegex())
     }
 
+    private fun setupNameValidation() {
+        binding.nameEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                checkFieldsForEmptyValues()
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
     private fun setupEmailValidation() {
         binding.emailEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -112,11 +113,19 @@ class RegisterActivity : AppCompatActivity() {
                         binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
                     }
                 }
+                checkFieldsForEmptyValues()
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }
+    private fun checkFieldsForEmptyValues() {
+        val name = binding.nameEditText.text.toString()
+        val email = binding.emailEditText.text.toString()
+        val password = binding.passwordEditText.text.toString()
+
+        binding.registerButton.isEnabled = email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()
+    }
+
 
     private fun setupPasswordValidation() {
         binding.passwordEditText.addTextChangedListener(object : TextWatcher {
@@ -132,8 +141,8 @@ class RegisterActivity : AppCompatActivity() {
                         binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
                     }
                 }
+                checkFieldsForEmptyValues()
             }
-
             override fun afterTextChanged(s: Editable?) {}
         })
     }
