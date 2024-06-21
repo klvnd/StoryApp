@@ -13,12 +13,12 @@ import com.dicoding.storyapp.databinding.ActivityAddStoryBinding
 
 class AddStoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddStoryBinding
+
     private var currentImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize the binding
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -50,9 +50,7 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
     private fun startGallery() {
-        showToast("Gallery clicked")
         launcherGallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-
     }
 
     private val launcherGallery = registerForActivityResult(
@@ -67,7 +65,9 @@ class AddStoryActivity : AppCompatActivity() {
     }
 
     private fun showImage() {
-        binding.ivAddStoryImage.setImageURI(currentImageUri)
+        currentImageUri?.let {
+            binding.ivAddStoryImage.setImageURI(it)
+        }
     }
 
     private fun showToast(message: String) {
