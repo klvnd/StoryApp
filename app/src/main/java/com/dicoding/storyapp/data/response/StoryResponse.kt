@@ -14,9 +14,6 @@ data class StoryResponse(
 	@field:SerializedName("lat")
 	val lat: Double? = null,
 
-	@field:SerializedName("error")
-	val error: Boolean = false,
-
 	@field:SerializedName("message")
 	val message: String? = null
 )
