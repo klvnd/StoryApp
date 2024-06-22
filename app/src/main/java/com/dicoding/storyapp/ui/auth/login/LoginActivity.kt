@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.dicoding.storyapp.button.MyEditText
 import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.data.Repository
 import com.dicoding.storyapp.data.api.ApiConfig
@@ -36,8 +37,6 @@ class LoginActivity : AppCompatActivity() {
 
         dataStoreManager = DataStoreManager(this)
 
-        setupEmailValidation()
-        setupPasswordValidation()
         playAnimation()
 
         val token = ""
@@ -75,35 +74,22 @@ class LoginActivity : AppCompatActivity() {
                     create()
                     show()
                 }
+                clearInputFields()
             }
         }
+        binding.emailEditText.addTextChangedListener(textWatcher)
+        binding.passwordEditText.addTextChangedListener(textWatcher)
+        checkFieldsForEmptyValues()
     }
 
-    private fun validateEmail(email: String): Boolean {
-        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-        return email.matches(emailPattern.toRegex())
+    private val textWatcher = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            checkFieldsForEmptyValues()
+        }
+        override fun afterTextChanged(s: Editable?) {}
     }
 
-    private fun setupEmailValidation() {
-        binding.emailEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let {
-                    val isValid = validateEmail(it.toString())
-                    if (!isValid) {
-                        binding.emailEditText.error = "Invalid email format"
-                        binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
-                    } else {
-                        binding.emailEditText.error = null
-                        binding.emailEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
-                    }
-                }
-                checkFieldsForEmptyValues()
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
-    }
 
     private fun checkFieldsForEmptyValues() {
         val email = binding.emailEditText.text.toString()
@@ -111,25 +97,9 @@ class LoginActivity : AppCompatActivity() {
 
         binding.loginButton.isEnabled = email.isNotEmpty() && password.isNotEmpty()
     }
-
-    private fun setupPasswordValidation() {
-        binding.passwordEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let {
-                    if (it.length < 8) {
-                        binding.passwordEditText.error = "Password must not be less than 8 characters"
-                        binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_NONE
-                    } else {
-                        binding.passwordEditText.error = null
-                        binding.passwordEditTextLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-                    }
-                }
-                checkFieldsForEmptyValues()
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+    private fun clearInputFields() {
+        binding.emailEditText.text?.clear()
+        binding.passwordEditText.text?.clear()
     }
 
     private fun playAnimation() {
@@ -142,9 +112,9 @@ class LoginActivity : AppCompatActivity() {
         val login = ObjectAnimator.ofFloat(binding.loginButton, View.ALPHA, 1f).setDuration(500)
         val title = ObjectAnimator.ofFloat(binding.titleTextView, View.ALPHA, 1f).setDuration(500)
         val email = ObjectAnimator.ofFloat(binding.emailTextView, View.ALPHA, 1f).setDuration(500)
-        val emailInput = ObjectAnimator.ofFloat(binding.emailEditTextLayout, View.ALPHA, 1f).setDuration(500)
+        val emailInput = ObjectAnimator.ofFloat(binding.emailEditText, View.ALPHA, 1f).setDuration(500)
         val password = ObjectAnimator.ofFloat(binding.passwordTextView, View.ALPHA, 1f).setDuration(500)
-        val passwordInput = ObjectAnimator.ofFloat(binding.passwordEditTextLayout, View.ALPHA, 1f).setDuration(500)
+        val passwordInput = ObjectAnimator.ofFloat(binding.passwordEditText, View.ALPHA, 1f).setDuration(500)
         val register = ObjectAnimator.ofFloat(binding.registerTextView, View.ALPHA, 1f).setDuration(500)
 
         val togetherEmail = AnimatorSet().apply {

@@ -51,28 +51,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/emailEditTextLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginTop="8dp"
+            android:minHeight="48dp"
             android:alpha="0"
             tools:alpha="100"
+            android:drawableStart="@drawable/ic_baseline_email_24"
+            android:drawablePadding="4dp"
+            android:inputType="textEmailAddress"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/emailTextView"
-            app:startIconDrawable="@drawable/ic_baseline_email_24">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/emailEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textEmailAddress"
-                tools:ignore="SpeakableTextPresentCheck" />
-        </com.google.android.material.textfield.TextInputLayout>
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <TextView
             android:id="@+id/passwordTextView"
@@ -85,31 +78,23 @@
             tools:alpha="100"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emailEditTextLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/emailEditText" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/passwordEditTextLayout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="0dp"
+        <com.dicoding.storyapp.button.MyEditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginTop="8dp"
+            android:minHeight="48dp"
             android:alpha="0"
             tools:alpha="100"
-            app:endIconMode="password_toggle"
+            android:inputType="textPassword"
+            android:drawableStart="@drawable/ic_baseline_lock_24"
+            android:drawablePadding="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/passwordTextView"
-            app:startIconDrawable="@drawable/ic_baseline_lock_24">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/passwordEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textPassword"
-                tools:ignore="SpeakableTextPresentCheck" />
-        </com.google.android.material.textfield.TextInputLayout>
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <TextView
             android:id="@+id/registerTextView"
@@ -122,7 +107,7 @@
             android:textColor="@color/blue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/passwordEditTextLayout"/>
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText"/>
 
         <com.dicoding.storyapp.button.MyButton
             android:id="@+id/loginButton"
