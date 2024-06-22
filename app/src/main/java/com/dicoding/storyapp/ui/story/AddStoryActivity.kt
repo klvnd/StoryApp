@@ -1,18 +1,16 @@
 package com.dicoding.storyapp.ui.story
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBar
@@ -25,6 +23,7 @@ import com.dicoding.storyapp.data.api.ApiConfig
 import com.dicoding.storyapp.data.response.ErrorResponse
 import com.dicoding.storyapp.databinding.ActivityAddStoryBinding
 import com.dicoding.storyapp.ui.main.MainActivity
+import com.dicoding.storyapp.utils.*
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -35,12 +34,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 
 class AddStoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddStoryBinding
 
     private var currentImageUri: Uri? = null
     private val REQUEST_CODE_CAMERA = 100
+    private val MAXIMAL_SIZE = 1000000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,25 +68,35 @@ class AddStoryActivity : AppCompatActivity() {
         }
 
         binding.etDescription.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 checkFieldsForEmptyValues()
             }
         })
     }
 
+    fun File.reduceFileImage(): File {
+        val file = this
+        val bitmap = BitmapFactory.decodeFile(file.path)
+        var compressQuality = 100
+        var streamLength: Int
+        do {
+            val bmpStream = ByteArrayOutputStream()
+            bitmap?.compress(Bitmap.CompressFormat.JPEG, compressQuality, bmpStream)
+            val bmpPicByteArray = bmpStream.toByteArray()
+            streamLength = bmpPicByteArray.size
+            compressQuality -= 5
+        } while (streamLength > MAXIMAL_SIZE)
+        bitmap?.compress(Bitmap.CompressFormat.JPEG, compressQuality, FileOutputStream(file))
+        return file
+    }
+
     private fun uploadStory() {
         currentImageUri?.let { uri ->
-            val imageFile = uriToFile(uri)
-
+            val imageFile = uriToFile(this, uri).reduceFileImage()
             val description = binding.etDescription.text.toString()
-
-            showLoading(true)
+            showLoading(true, binding.progressBar)
 
             val requestBody = description.toRequestBody("text/plain".toMediaType())
             val requestImageFile = imageFile.asRequestBody("image/jpeg".toMediaType())
@@ -101,38 +112,23 @@ class AddStoryActivity : AppCompatActivity() {
                     val token = dataStoreManager.tokenFlow.first() ?: ""
                     val apiService = ApiConfig.getApiService(token = token)
                     val errorResponse = apiService.addStories(requestBody, multipartBody)
-                    errorResponse.message?.let { showToast(it) }
-                    showLoading(false)
+                    errorResponse.message?.let { showToast(this@AddStoryActivity, it) }
+                    showLoading(false, binding.progressBar)
                     val intent = Intent(this@AddStoryActivity, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                     startActivity(intent)
                 } catch (e: HttpException) {
                     val errorBody = e.response()?.errorBody()?.string()
                     val errorResponse = Gson().fromJson(errorBody, ErrorResponse::class.java)
-                    errorResponse.message?.let { showToast(it) }
-                    showLoading(false)
+                    errorResponse.message?.let { showToast(this@AddStoryActivity, it) }
+                    showLoading(false, binding.progressBar)
                 }
             }
-        } ?: showToast("Please select an image")
-    }
-
-
-    private fun uriToFile(uri: Uri): File {
-        val file = File(cacheDir, "temp_image.jpg")
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            file.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-        }
-        return file
+        } ?: showToast(this, "Please select an image")
     }
 
     private fun checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera()
         } else {
             requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -145,17 +141,16 @@ class AddStoryActivity : AppCompatActivity() {
         if (isGranted) {
             startCamera()
         } else {
-            showToast("Camera permission is required to use the camera.")
+            showToast(this, "Camera permission is required to use the camera.")
         }
     }
 
     private fun startCamera() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-
         try {
             startActivityForResult(takePictureIntent, REQUEST_CODE_CAMERA)
-        }catch (e: Exception) {
-            showToast("Error: ${e.message}")
+        } catch (e: Exception) {
+            showToast(this, "Error: ${e.message}")
         }
     }
 
@@ -175,18 +170,6 @@ class AddStoryActivity : AppCompatActivity() {
         }
     }
 
-    private fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
-        val bytes = ByteArrayOutputStream()
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
-        val path = MediaStore.Images.Media.insertImage(
-            inContext.contentResolver,
-            inImage,
-            "Title",
-            null
-        )
-        return Uri.parse(path)
-    }
-
     private fun startGallery() {
         launcherGallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
@@ -198,7 +181,7 @@ class AddStoryActivity : AppCompatActivity() {
             currentImageUri = uri
             showImage(uri)
         } else {
-            showToast("No media selected")
+            showToast(this, "No media selected")
         }
     }
 
@@ -211,13 +194,5 @@ class AddStoryActivity : AppCompatActivity() {
     private fun checkFieldsForEmptyValues() {
         val description = binding.etDescription.text.toString()
         binding.btnUpload.isEnabled = currentImageUri != null && description.isNotEmpty()
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 }
