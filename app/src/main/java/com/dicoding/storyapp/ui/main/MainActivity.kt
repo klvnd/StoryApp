@@ -17,6 +17,7 @@ import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.DataStoreManager
 import com.dicoding.storyapp.data.response.ListStoryItem
 import com.dicoding.storyapp.databinding.ActivityMainBinding
+import com.dicoding.storyapp.ui.maps.MapsActivity
 import com.dicoding.storyapp.ui.story.AddStoryActivity
 import com.dicoding.storyapp.ui.story.DetailStoryActivity
 import com.dicoding.storyapp.ui.story.Injection
@@ -94,7 +95,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+        when (item.itemId) {
+            R.id.action_map -> {
+                startActivity(Intent(this, MapsActivity::class.java))
+                return true
+            }
             R.id.action_settings -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("Logout")
@@ -112,9 +117,9 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
                 builder.create().show()
-                true
+                return true
             }
-            else -> super.onOptionsItemSelected(item)
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 }
