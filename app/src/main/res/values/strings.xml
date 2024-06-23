@@ -23,4 +23,8 @@
     <string name="password_error_message">Password must not be less than 8 characters</string>
     <string name="maps">maps</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="default_type">Default</string>
+    <string name="satellite_type">Satellite</string>
+    <string name="terrain_type">Terrain</string>
+    <string name="hybrid_type">Hybrid</string>
 </resources>
