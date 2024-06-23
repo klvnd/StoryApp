@@ -1,6 +1,5 @@
 package com.dicoding.storyapp.ui.main
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -12,6 +11,7 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.cachedIn
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dicoding.storyapp.R
 import com.dicoding.storyapp.data.DataStoreManager
@@ -21,7 +21,8 @@ import com.dicoding.storyapp.ui.maps.MapsActivity
 import com.dicoding.storyapp.ui.story.AddStoryActivity
 import com.dicoding.storyapp.ui.story.DetailStoryActivity
 import com.dicoding.storyapp.ui.story.Injection
-import com.dicoding.storyapp.ui.story.StoryAdapter
+import com.dicoding.storyapp.ui.adapter.StoryAdapter
+import com.dicoding.storyapp.ui.adapter.LoadingStateAdapter
 import com.dicoding.storyapp.ui.viewmodel.UserViewModel
 import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.dicoding.storyapp.ui.welcome.WelcomeActivity
@@ -35,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dataStoreManager: DataStoreManager
     private lateinit var storyAdapter: StoryAdapter
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -49,29 +49,25 @@ class MainActivity : AppCompatActivity() {
 
         dataStoreManager = DataStoreManager(this)
 
-        storyAdapter = StoryAdapter(emptyList(), object : StoryAdapter.OnItemClickListener {
+        storyAdapter = StoryAdapter(object : StoryAdapter.OnItemClickListener {
             override fun onItemClick(story: ListStoryItem) {
                 showDetailActivity(story)
             }
         })
+
         binding.rvStory.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = storyAdapter
+            adapter = storyAdapter.withLoadStateFooter(
+                footer = LoadingStateAdapter { storyAdapter.retry() }
+            )
         }
 
         val viewModel: UserViewModel by viewModels {
             ViewModelFactory(runBlocking { Injection.provideRepository(this@MainActivity) })
         }
 
-        viewModel.getStories().observe(this) { storyResponse ->
-            storyResponse?.listStory?.let { stories ->
-                storyAdapter = StoryAdapter(stories, object : StoryAdapter.OnItemClickListener {
-                    override fun onItemClick(story: ListStoryItem) {
-                        showDetailActivity(story)
-                    }
-                })
-                binding.rvStory.adapter = storyAdapter
-            }
+        viewModel.getStories.cachedIn(lifecycleScope).observe(this) { pagingData ->
+            storyAdapter.submitData(lifecycle, pagingData)
         }
 
         val fab: FloatingActionButton = findViewById(R.id.fab)
@@ -80,14 +76,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun showDetailActivity(story: ListStoryItem) {
         val intent = Intent(this, DetailStoryActivity::class.java)
         intent.putExtra(DetailStoryActivity.STORY_ITEM, story)
         startActivity(intent)
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
