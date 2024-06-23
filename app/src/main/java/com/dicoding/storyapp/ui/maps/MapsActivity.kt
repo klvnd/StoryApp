@@ -1,5 +1,6 @@
 package com.dicoding.storyapp.ui.maps
 
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,22 +8,35 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.dicoding.storyapp.R
-
+import com.dicoding.storyapp.data.Repository
+import com.dicoding.storyapp.data.api.ApiConfig
+import com.dicoding.storyapp.data.DataStoreManager
+import com.dicoding.storyapp.databinding.ActivityMapsBinding
+import com.dicoding.storyapp.ui.viewmodel.MapsViewModel
+import com.dicoding.storyapp.ui.viewmodel.ViewModelFactory
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.dicoding.storyapp.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.launch
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    private lateinit var dataStoreManager: DataStoreManager
+    private var mapsViewModel: MapsViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,28 +50,58 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val titleTextView = supportActionBar?.customView?.findViewById<TextView>(R.id.action_bar_title)
         titleTextView?.text = "Maps Story"
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        dataStoreManager = DataStoreManager(this)
+
+        lifecycleScope.launch {
+            dataStoreManager.tokenFlow.collect { token ->
+                if (token != null) {
+                    initializeViewModel(token)
+                    observeStories()
+                } else {
+                    showToast("Token is null")
+                }
+            }
+        }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+    private fun initializeViewModel(token: String) {
+        val viewModelFactory = ViewModelFactory(Repository(ApiConfig.getApiService(token)))
+        mapsViewModel = viewModels<MapsViewModel> { viewModelFactory }.value
+    }
+
+    private fun observeStories() {
+        mapsViewModel?.stories?.observe(this) { stories ->
+            Log.d(TAG, "Number of stories: ${stories.size}")
+            if (stories.isNotEmpty()) {
+                val boundsBuilder = LatLngBounds.Builder()
+                stories.forEach { story ->
+                    story.lat?.let { lat ->
+                        story.lon?.let { lon ->
+                            val latLng = LatLng(lat, lon)
+                            mMap.addMarker(
+                                MarkerOptions()
+                                    .position(latLng)
+                                    .title(story.name)
+                                    .snippet(story.description)
+                            )
+                            boundsBuilder.include(latLng)
+                        }
+                    }
+                }
+                val bounds = boundsBuilder.build()
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+            } else {
+                showToast("No stories available")
+            }
+        }
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
 
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.uiSettings.isIndoorLevelPickerEnabled = true
@@ -65,6 +109,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isMapToolbarEnabled = true
 
         setMapStyle()
+        getMyLocation()
+
+        mapsViewModel?.fetchStoriesWithLocation() ?: run {
+            lifecycleScope.launch {
+                dataStoreManager.tokenFlow.collect { token ->
+                    if (token != null) {
+                        initializeViewModel(token)
+                        mapsViewModel?.fetchStoriesWithLocation()
+                    }
+                }
+            }
+        }
     }
 
     private fun setMapStyle() {
@@ -72,10 +128,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val success =
                 mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style))
             if (!success) {
-                Log.e(TAG, "Style parsing failed.")
+                showToast("Style parsing failed.")
             }
         } catch (exception: Resources.NotFoundException) {
-            Log.e(TAG, "Can't find style. Error: ", exception)
+            showToast("Can't find style. Error: $exception")
+        }
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                getMyLocation()
+            }
+        }
+    private fun getMyLocation() {
+        if (ContextCompat.checkSelfPermission(
+                this.applicationContext,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            mMap.isMyLocationEnabled = true
+        } else {
+            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
@@ -83,7 +159,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         menuInflater.inflate(R.menu.map_options, menu)
         return true
     }
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -111,6 +186,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 super.onOptionsItemSelected(item)
             }
         }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     companion object {

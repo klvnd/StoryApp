@@ -7,9 +7,15 @@ import com.dicoding.storyapp.data.Repository
 class ViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-            return UserViewModel(repository) as T
+        return when {
+            modelClass.isAssignableFrom(UserViewModel::class.java) -> {
+                UserViewModel(repository) as T
+            }
+            modelClass.isAssignableFrom(MapsViewModel::class.java) -> {
+                MapsViewModel(repository) as T
+            }
+            else -> throw IllegalArgumentException("Unknown ViewModel class")
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+
