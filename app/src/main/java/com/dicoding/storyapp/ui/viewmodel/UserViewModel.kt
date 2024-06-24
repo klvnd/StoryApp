@@ -19,9 +19,6 @@ class UserViewModel(private val repository: Repository) : ViewModel() {
     val registerResponse: LiveData<RegisterResponse> = _registerResponse
     val loginResponse: LiveData<LoginResponse> = _loginResponse
 
-//    val getStories: LiveData<PagingData<ListStoryItem>> =
-//        repository.getStories().cachedIn(viewModelScope)
-
     val getStories: LiveData<PagingData<ListStoryItem>> by lazy {
         repository.getStories().cachedIn(viewModelScope)
     }
